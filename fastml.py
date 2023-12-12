@@ -4,7 +4,6 @@ from xgboost import XGBClassifier, XGBRegressor
 import pandas as pd
 import pickle
 
-
 app = FastAPI()
 
 class ScoringItem(BaseModel):
@@ -46,8 +45,7 @@ def encode_and_normalize_Data(data):
     except:
         data_encoded = pd.concat([data, data_features_df], axis=1).drop(columns=['p1_class', 'p2_class', 'p3_class', 'p4_class', 'monster_type'])
         
-    data_encoded_normalized = normalizer.transform(data_encoded)
-    return data_encoded_normalized    
+    return normalizer.transform(data_encoded)    
 
 def predict_difficulty(data):
     regression_model = XGBRegressor()
@@ -68,8 +66,10 @@ def predict_tpk(data):
 
 @app.post("/")
 def read_root(item: ScoringItem):
+    
     df = pd.DataFrame([item.dict().values()], columns=item.dict().keys())
     df_encoded_normalized = encode_and_normalize_Data(df)
+    
     return {
         "difficulty_score": predict_difficulty(df_encoded_normalized),
         "probabal_tpk": predict_tpk(df_encoded_normalized),
