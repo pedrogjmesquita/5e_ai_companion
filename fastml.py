@@ -33,19 +33,20 @@ class ScoringItem(BaseModel):
     players_level: int
 
 def encode_and_normalize_Data(data):
-    with open('models\encoder.pkl', 'rb') as f:
-        encoder = pickle.load(f)
+    # with open('models/encoder.pkl', 'rb') as f:
+    #     encoder = pickle.load(f)
         
-    with open('models\\normalizer.pkl', 'rb') as f:
-        normalizer = pickle.load(f)
+    # with open('models/normalizer.pkl', 'rb') as f:
+    #     normalizer = pickle.load(f)
         
-    data_features_df = encoder.transform(data[['p1_class', 'p2_class', 'p3_class', 'p4_class', 'monster_type']])
-    try:
-        data_encoded = pd.concat([data, data_features_df], axis=1).drop(columns=['p1_class', 'p2_class', 'p3_class', 'p4_class', 'monster_type', 'monster_name','dificulty'])
-    except:
-        data_encoded = pd.concat([data, data_features_df], axis=1).drop(columns=['p1_class', 'p2_class', 'p3_class', 'p4_class', 'monster_type'])
+    # data_features_df = encoder.transform(data[['p1_class', 'p2_class', 'p3_class', 'p4_class', 'monster_type']])
+    # try:
+    #     data_encoded = pd.concat([data, data_features_df], axis=1).drop(columns=['p1_class', 'p2_class', 'p3_class', 'p4_class', 'monster_type', 'monster_name','dificulty'])
+    # except:
+    #     data_encoded = pd.concat([data, data_features_df], axis=1).drop(columns=['p1_class', 'p2_class', 'p3_class', 'p4_class', 'monster_type'])
         
-    return normalizer.transform(data_encoded)    
+    # return normalizer.transform(data_encoded)   
+    return {'1':'iha'} 
 
 def predict_difficulty(data):
     regression_model = XGBRegressor()
