@@ -31,25 +31,24 @@ class ScoringItem(BaseModel):
     monster_type: str
     dificulty: int
     players_level: int
+    monster_size: str
 
 def encode_and_normalize_Data(data):
-    with open('models/encoder.pkl', 'rb') as f:
+    with open('encoder.pkl', 'rb') as f:
         encoder = pickle.load(f)
         
-    with open('models/normalizer.pkl', 'rb') as f:
-        normalizer = pickle.load(f)
         
-    data_features_df = encoder.transform(data[['p1_class', 'p2_class', 'p3_class', 'p4_class', 'monster_type']])
+    data_features_df = encoder.transform(data[['p1_class', 'p2_class', 'p3_class', 'p4_class', 'monster_type','monster_size']])
     try:
-        data_encoded = pd.concat([data, data_features_df], axis=1).drop(columns=['p1_class', 'p2_class', 'p3_class', 'p4_class', 'monster_type', 'monster_name','dificulty'])
+        data_encoded = pd.concat([data, data_features_df], axis=1).drop(columns=['p1_class', 'p2_class', 'p3_class', 'p4_class', 'monster_type','monster_size', 'monster_name','dificulty'])
     except:
-        data_encoded = pd.concat([data, data_features_df], axis=1).drop(columns=['p1_class', 'p2_class', 'p3_class', 'p4_class', 'monster_type'])
+        data_encoded = pd.concat([data, data_features_df], axis=1).drop(columns=['p1_class', 'p2_class', 'p3_class', 'p4_class', 'monster_type','monster_size'])
         
-    return normalizer.transform(data_encoded)    
+    return data_encoded
 
 def predict_difficulty(data):
     regression_model = XGBRegressor()
-    regression_model.load_model('models\model_OPT_NORMALIZED.ubj')
+    regression_model.load_model('Regreesion_XGBoost_OPT_v2.ubj')
     prediction = round(regression_model.predict(data)[0], 3)
 
     if prediction < 0:
@@ -61,7 +60,7 @@ def predict_difficulty(data):
 
 def predict_tpk(data):
     classification_model = XGBClassifier()
-    classification_model.load_model('models\model_opt_normalized_classification.ubj')
+    classification_model.load_model('model_opt_classification_v2.ubj')
     return int(classification_model.predict(data)[0])
 
 @app.get("/")
@@ -71,10 +70,10 @@ def read_root():
 @app.post("/")
 def read_root(item: ScoringItem):
     
-    df = pd.DataFrame([item.dict().values()], columns=item.dict().keys())
-    df_encoded_normalized = encode_and_normalize_Data(df)
+    df = pd.DataFrame([item.dict()])
+    df_encoded = encode_and_normalize_Data(df)
     
     return {
-        "difficulty_score": predict_difficulty(df_encoded_normalized),
-        "probabal_tpk": predict_tpk(df_encoded_normalized),
+        "difficulty_score": predict_difficulty(df_encoded),
+        "probabal_tpk": predict_tpk(df_encoded),
         }
